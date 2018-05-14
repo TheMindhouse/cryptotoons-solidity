@@ -31,6 +31,9 @@ contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
      * @dev Constructor function
      */
     constructor(string _name, string _symbol) public {
+        supportedInterfaces[0x5b5e139f] = true; // ERC721Metadata
+        supportedInterfaces[0x780e9d63] = true; // ERC721Enumerable
+
         name_ = _name;
         symbol_ = _symbol;
     }
@@ -84,18 +87,8 @@ contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
     function tokenByIndex(uint256 _index) public view returns (uint256) {
         require(_index < totalSupply());
 
-        //In our case id is an index and vice versa. 
+        //In our case id is an index and vice versa.
         return _index;
-    }
-
-    function supportsInterface(bytes4 _interfaceID) external view returns (bool) {
-        //TODO: Double check implementation
-
-        return _interfaceID == 0x01ffc9a7 //ERC165
-        || _interfaceID == 0x80ac58cd //ERC721
-        || _interfaceID == 0x5b5e139f //ERC721Metadata
-        || _interfaceID == 0x780e9d63;
-        //ERC721Enumerable
     }
 
     /**

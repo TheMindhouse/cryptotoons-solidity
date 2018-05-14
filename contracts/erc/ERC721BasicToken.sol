@@ -4,12 +4,13 @@ import "./ERC721Basic.sol";
 import "./ERC721Receiver.sol";
 import "../lib/SafeMath.sol";
 import "../lib/AddressUtils.sol";
+import "./ERC165MappingImplementation.sol";
 
 /**
  * @title ERC721 Non-Fungible Token Standard basic implementation
  * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
-contract ERC721BasicToken is ERC721Basic {
+contract ERC721BasicToken is ERC721Basic, ERC165MappingImplementation {
     using SafeMath for uint256;
     using AddressUtils for address;
 
@@ -36,6 +37,10 @@ contract ERC721BasicToken is ERC721Basic {
     modifier onlyOwnerOf(uint256 _tokenId) {
         require(ownerOf(_tokenId) == msg.sender);
         _;
+    }
+
+    constructor() public {
+        supportedInterfaces[0x80ac58cd] = true;
     }
 
     /**

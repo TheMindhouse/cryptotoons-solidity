@@ -9,6 +9,8 @@ contract CryptoToons is ToonMinting, ToonInterface {
     constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons)
     public
     ToonMinting(_name, _symbol, _maxSupply, _maxPromoToons) {
+        //ToonInterface
+        supportedInterfaces[this.maxSupply.selector ^ this.getToonInfo.selector] = true;
     }
 
     function getToonInfo(uint _id) external view returns (
