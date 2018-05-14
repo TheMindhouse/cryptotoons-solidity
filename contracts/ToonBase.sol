@@ -13,6 +13,8 @@ contract ToonBase is ERC721Token, AccessControl, ToonInterface {
     constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons)
     public
     ERC721Token(_name, _symbol) {
+        require(_maxPromoToons <= _maxSupply);
+
         maxSupply = _maxSupply;
         maxPromoToons = _maxPromoToons;
     }
@@ -45,6 +47,8 @@ contract ToonBase is ERC721Token, AccessControl, ToonInterface {
     }
 
     function _createToon(uint _genes, address _owner) internal {
+        require(totalSupply() < maxSupply);
+
         Toon memory _toon = Toon(_genes, now);
         uint id = toons.push(_toon) - 1;
 
