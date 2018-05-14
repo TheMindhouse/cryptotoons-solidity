@@ -7,12 +7,13 @@ pragma solidity ^0.4.23;
  *
  * https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol
  */
-library SafeMath {
+library SafeMath32 {
+
 
     /**
     * @dev Multiplies two numbers, throws on overflow.
     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
+    function mul(uint32 a, uint32 b) internal pure returns (uint32 c) {
         if (a == 0) {
             return 0;
         }
@@ -24,9 +25,9 @@ library SafeMath {
     /**
     * @dev Integer division of two numbers, truncating the quotient.
     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    function div(uint32 a, uint32 b) internal pure returns (uint32) {
         // assert(b > 0); // Solidity automatically throws when dividing by 0
-        // uint256 c = a / b;
+        // uint32 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return a / b;
     }
@@ -34,7 +35,7 @@ library SafeMath {
     /**
     * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
     */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    function sub(uint32 a, uint32 b) internal pure returns (uint32) {
         assert(b <= a);
         return a - b;
     }
@@ -42,7 +43,7 @@ library SafeMath {
     /**
     * @dev Adds two numbers, throws on overflow.
     */
-    function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
+    function add(uint32 a, uint32 b) internal pure returns (uint32 c) {
         c = a + b;
         assert(c >= a);
         return c;

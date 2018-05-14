@@ -6,6 +6,8 @@ import "./ERC165.sol";
 
 
 /**
+ * @dev Contract has tokenURI and totalSupply functions not implemented!
+ *
  * @title Full ERC721 Token
  * This implementation includes all the required and some optional functionality of the ERC721 standard
  * Moreover, it includes approve all functionality using operator terminology
@@ -24,15 +26,6 @@ contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
 
     // Mapping from token ID to index of the owner tokens list
     mapping(uint256 => uint256) internal ownedTokensIndex;
-
-    // Array with all token ids, used for enumeration
-    uint256[] internal allTokens;
-
-    // Mapping from token id to position in the allTokens array
-    mapping(uint256 => uint256) internal allTokensIndex;
-
-    // Optional mapping for token URIs
-    mapping(uint256 => string) internal tokenURIs;
 
     /**
      * @dev Constructor function
@@ -63,10 +56,7 @@ contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
      * @dev Throws if the token ID does not exist. May return an empty string.
      * @param _tokenId uint256 ID of the token to query
      */
-    function tokenURI(uint256 _tokenId) public view returns (string) {
-        require(exists(_tokenId));
-        return tokenURIs[_tokenId];
-    }
+    function tokenURI(uint256 _tokenId) public view returns (string);
 
     /**
      * @dev Gets the token ID at a given index of the tokens list of the requested owner
@@ -83,9 +73,7 @@ contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
      * @dev Gets the total amount of tokens stored by the contract
      * @return uint256 representing the total amount of tokens
      */
-    function totalSupply() public view returns (uint256) {
-        return allTokens.length;
-    }
+    function totalSupply() public view returns (uint256);
 
     /**
      * @dev Gets the token ID at a given index of all the tokens in this contract
@@ -95,7 +83,9 @@ contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
      */
     function tokenByIndex(uint256 _index) public view returns (uint256) {
         require(_index < totalSupply());
-        return allTokens[_index];
+
+        //In our case id is an index and vice versa. 
+        return _index;
     }
 
     function supportsInterface(bytes4 _interfaceID) external view returns (bool) {
@@ -104,18 +94,8 @@ contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
         return _interfaceID == 0x01ffc9a7 //ERC165
         || _interfaceID == 0x80ac58cd //ERC721
         || _interfaceID == 0x5b5e139f //ERC721Metadata
-        || _interfaceID == 0x780e9d63; //ERC721Enumerable
-    }
-
-    /**
-     * @dev Internal function to set the token URI for a given token
-     * @dev Reverts if the token ID does not exist
-     * @param _tokenId uint256 ID of the token to set its URI
-     * @param _uri string URI to assign
-     */
-    function _setTokenURI(uint256 _tokenId, string _uri) internal {
-        require(exists(_tokenId));
-        tokenURIs[_tokenId] = _uri;
+        || _interfaceID == 0x780e9d63;
+        //ERC721Enumerable
     }
 
     /**
@@ -151,19 +131,6 @@ contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
         ownedTokens[_from].length--;
         ownedTokensIndex[_tokenId] = 0;
         ownedTokensIndex[lastToken] = tokenIndex;
-    }
-
-    /**
-     * @dev Internal function to mint a new token
-     * @dev Reverts if the given token ID already exists
-     * @param _to address the beneficiary that will own the minted token
-     * @param _tokenId uint256 ID of the token to be minted by the msg.sender
-     */
-    function _mint(address _to, uint256 _tokenId) internal {
-        super._mint(_to, _tokenId);
-
-        allTokensIndex[_tokenId] = allTokens.length;
-        allTokens.push(_tokenId);
     }
 
 }

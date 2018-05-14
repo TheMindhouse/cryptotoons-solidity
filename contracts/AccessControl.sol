@@ -1,12 +1,14 @@
 pragma solidity 0.4.23;
 
+import "./Ownable.sol";
+
 /// Copied from CryptoKitties
 ///
 /// @title A facet of KittyCore that manages special access privileges.
 /// @author Axiom Zen (https://www.axiomzen.co)
 /// @dev See the KittyCore contract documentation to understand how the various contract facets are arranged.
 
-contract KittyAccessControl {
+contract AccessControl is Ownable {
     // This facet controls access control for CryptoKitties. There are four roles managed here:
     //
     //     - The CEO: The CEO can reassign other roles and change the addresses of our dependent smart
@@ -57,6 +59,12 @@ contract KittyAccessControl {
             msg.sender == cfoAddress
         );
         _;
+    }
+
+    constructor() public {
+        ceoAddress = owner;
+        cfoAddress = owner;
+        cooAddress = owner;
     }
 
     /// @dev Assigns a new address to act as the CEO. Only available to the current CEO.
