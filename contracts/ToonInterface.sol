@@ -9,6 +9,8 @@ import "./erc/ERC721.sol";
 */
 contract ToonInterface is ERC721 {
 
+    function isToonInterface() external pure returns (bool);
+
     /**
     * @notice   Returns maximum supply. In other words there will
     *           be never more toons that that number. It has to
