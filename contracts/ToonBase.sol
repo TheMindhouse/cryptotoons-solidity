@@ -16,6 +16,10 @@ contract ToonBase is ERC721Token, AccessControl {
         maxPromoToons = _maxPromoToons;
     }
 
+    function maxSupply() public view returns (uint) {
+        return maxSupply;
+    }
+
     /**
      * @dev Gets the total amount of tokens stored by the contract
      * @return uint256 representing the total amount of tokens
