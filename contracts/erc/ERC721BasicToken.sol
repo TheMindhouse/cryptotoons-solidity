@@ -221,17 +221,6 @@ contract ERC721BasicToken is ERC721Basic {
     }
 
     /**
-     * @dev Internal function to burn a specific token
-     * @dev Reverts if the token does not exist
-     * @param _tokenId uint256 ID of the token being burned by the msg.sender
-     */
-    function _burn(address _owner, uint256 _tokenId) internal {
-        clearApproval(_owner, _tokenId);
-        removeTokenFrom(_owner, _tokenId);
-        emit Transfer(_owner, address(0), _tokenId);
-    }
-
-    /**
      * @dev Internal function to clear current approval of a given token ID
      * @dev Reverts if the given address is not indeed the owner of the token
      * @param _owner owner of the token

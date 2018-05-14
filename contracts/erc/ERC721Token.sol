@@ -2,6 +2,7 @@ pragma solidity ^0.4.23;
 
 import "./ERC721.sol";
 import "./ERC721BasicToken.sol";
+import "./ERC165.sol";
 
 
 /**
@@ -10,7 +11,7 @@ import "./ERC721BasicToken.sol";
  * Moreover, it includes approve all functionality using operator terminology
  * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
-contract ERC721Token is ERC721, ERC721BasicToken {
+contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
 
     // Token name
     string internal name_;
@@ -97,6 +98,15 @@ contract ERC721Token is ERC721, ERC721BasicToken {
         return allTokens[_index];
     }
 
+    function supportsInterface(bytes4 _interfaceID) external view returns (bool) {
+        //TODO: Double check implementation
+
+        return _interfaceID == 0x01ffc9a7 //ERC165
+        || _interfaceID == 0x80ac58cd //ERC721
+        || _interfaceID == 0x5b5e139f //ERC721Metadata
+        || _interfaceID == 0x780e9d63; //ERC721Enumerable
+    }
+
     /**
      * @dev Internal function to set the token URI for a given token
      * @dev Reverts if the token ID does not exist
@@ -154,33 +164,6 @@ contract ERC721Token is ERC721, ERC721BasicToken {
 
         allTokensIndex[_tokenId] = allTokens.length;
         allTokens.push(_tokenId);
-    }
-
-    /**
-     * @dev Internal function to burn a specific token
-     * @dev Reverts if the token does not exist
-     * @param _owner owner of the token to burn
-     * @param _tokenId uint256 ID of the token being burned by the msg.sender
-     */
-    function _burn(address _owner, uint256 _tokenId) internal {
-        super._burn(_owner, _tokenId);
-
-        // Clear metadata (if any)
-        if (bytes(tokenURIs[_tokenId]).length != 0) {
-            delete tokenURIs[_tokenId];
-        }
-
-        // Reorg all tokens array
-        uint256 tokenIndex = allTokensIndex[_tokenId];
-        uint256 lastTokenIndex = allTokens.length.sub(1);
-        uint256 lastToken = allTokens[lastTokenIndex];
-
-        allTokens[tokenIndex] = lastToken;
-        allTokens[lastTokenIndex] = 0;
-
-        allTokens.length--;
-        allTokensIndex[_tokenId] = 0;
-        allTokensIndex[lastToken] = tokenIndex;
     }
 
 }
