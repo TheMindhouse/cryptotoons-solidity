@@ -7,7 +7,7 @@ import "./AccessControl.sol";
 contract ToonsAggregator is AccessControl {
     using AddressUtils for address;
 
-    event ToonFamilyAdded(uint _id, uint _name);
+    event ToonFamilyAdded(uint indexed _id, string _name);
 
     ToonFamily[] toonFamilies;
 
@@ -19,9 +19,9 @@ contract ToonsAggregator is AccessControl {
         require(_toonInterface.isToonInterface());
 
         ToonFamily memory _family = ToonFamily(true, _toonInterface);
-        uint id = toonFamilies.push(_family) - 1;
+        uint _id = toonFamilies.push(_family) - 1;
 
-        emit ToonFamilyAdded(_id, _family.name());
+        emit ToonFamilyAdded(_id, _toonInterface.name());
     }
 
     struct ToonFamily {

@@ -2,8 +2,9 @@ pragma solidity ^0.4.23;
 
 import "./erc/ERC721Token.sol";
 import "./AccessControl.sol";
+import "./ToonInterface.sol";
 
-contract ToonBase is ERC721Token, AccessControl {
+contract ToonBase is ERC721Token, AccessControl, ToonInterface {
 
     Toon[] private toons;
     uint public maxSupply;
@@ -16,7 +17,7 @@ contract ToonBase is ERC721Token, AccessControl {
         maxPromoToons = _maxPromoToons;
     }
 
-    function maxSupply() public view returns (uint) {
+    function maxSupply() external view returns (uint) {
         return maxSupply;
     }
 

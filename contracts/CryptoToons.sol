@@ -3,7 +3,7 @@ pragma solidity ^0.4.0;
 import "./ToonMinting.sol";
 import "./ToonInterface.sol";
 
-contract CryptoToons is ToonMinting, ToonInterface {
+contract CryptoToons is ToonMinting {
 
     //TODO should all the toons have the same symbol??
     constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons)
@@ -17,7 +17,7 @@ contract CryptoToons is ToonMinting, ToonInterface {
         address owner
     ) {
         Toon memory _toon = _getToon(_id);
-        return (toon.genes, toon.birthTime, ownerOf(_id));
+        return (_toon.genes, _toon.birthTime, ownerOf(_id));
     }
 
 }

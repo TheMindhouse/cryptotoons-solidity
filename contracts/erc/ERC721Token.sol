@@ -13,7 +13,7 @@ import "./ERC165.sol";
  * Moreover, it includes approve all functionality using operator terminology
  * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
-contract ERC721Token is ERC721, ERC721BasicToken, ERC165 {
+contract ERC721Token is ERC721, ERC721BasicToken {
 
     // Token name
     string internal name_;
