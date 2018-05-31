@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 import "./lib/AddressUtils.sol";
 import "./ToonInterface.sol";
