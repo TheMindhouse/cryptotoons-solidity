@@ -1,13 +1,19 @@
 pragma solidity ^0.4.24;
 
+import "./ToonInterface.sol";
+import "./Withdrawable.sol";
+import "./Pausable.sol";
+
 // @title Auction Core
 /// @dev Contains models, variables, and internal methods for the auction.
 /// @notice We omit a fallback function to prevent accidental sends to this contract.
 
-contract ClockAuctionBase {
+contract ClockAuctionBase is Withdrawable, Pausable {
 
     // Represents an auction on an NFT
     struct Auction {
+        // Address of a contract
+        address _contract;
         // Current owner of NFT
         address seller;
         // Price (in wei) at beginning of auction
@@ -22,56 +28,85 @@ contract ClockAuctionBase {
     }
 
     // Reference to contract tracking NFT ownership
-    ERC721 public nonFungibleContract;
+    //    ERC721 public nonFungibleContract;
+    ToonInterface[] public toonContracts;
+    mapping(address => uint256) addressToIndex;
 
     // Cut owner takes on each auction, measured in basis points (1/100 of a percent).
     // Values 0-10,000 map to 0%-100%
     uint256 public ownerCut;
 
-    // Map from token ID to their corresponding auction.
-    mapping (uint256 => Auction) tokenIdToAuction;
+    // Values 0-10,000 map to 0%-100%
+    // Author's share from the owner cut.
+    uint256 public authorShare;
 
-    event AuctionCreated(uint256 tokenId, uint256 startingPrice, uint256 endingPrice, uint256 duration);
-    event AuctionSuccessful(uint256 tokenId, uint256 totalPrice, address winner);
-    event AuctionCancelled(uint256 tokenId);
+    // Map from token ID to their corresponding auction.
+    //    mapping(uint256 => Auction) tokenIdToAuction;
+    mapping(address => mapping(uint256 => Auction)) tokenToAuction;
+
+    event AuctionCreated(address indexed _contract, uint256 indexed tokenId,
+        uint256 startingPrice, uint256 endingPrice, uint256 duration);
+    event AuctionSuccessful(address indexed _contract, uint256 indexed tokenId,
+        uint256 totalPrice, address indexed winner);
+    event AuctionCancelled(address indexed _contract, uint256 indexed tokenId);
+
+    /**
+    * @notice   Adds a new toon contract.
+    */
+    function _addToonContract(address _toonContractAddress) internal {
+        ToonInterface _interface = ToonInterface(_toonContractAddress);
+        require(_interface.isToonInterface());
+
+        uint _index = toonContracts.push(_interface) - 1;
+        addressToIndex[_toonContractAddress] = _index;
+    }
 
     /// @dev Returns true if the claimant owns the token.
+    /// @param _contract - address of a toon contract
     /// @param _claimant - Address claiming to own the token.
     /// @param _tokenId - ID of token whose ownership to verify.
-    function _owns(address _claimant, uint256 _tokenId) internal view returns (bool) {
-        return (nonFungibleContract.ownerOf(_tokenId) == _claimant);
+    function _owns(address _contract, address _claimant, uint256 _tokenId)
+    internal
+    view
+    returns (bool) {
+        ToonInterface _interface = _interfaceByAddress(_contract);
+        return (_interface.ownerOf(_tokenId) == _claimant);
     }
 
     /// @dev Escrows the NFT, assigning ownership to this contract.
     /// Throws if the escrow fails.
     /// @param _owner - Current owner address of token to escrow.
     /// @param _tokenId - ID of token whose approval to verify.
-    function _escrow(address _owner, uint256 _tokenId) internal {
+    function _escrow(address _contract, address _owner, uint256 _tokenId) internal {
+        ToonInterface _interface = _interfaceByAddress(_contract);
         // it will throw if transfer fails
-        nonFungibleContract.transferFrom(_owner, this, _tokenId);
+        _interface.transferFrom(_owner, this, _tokenId);
     }
 
     /// @dev Transfers an NFT owned by this contract to another address.
     /// Returns true if the transfer succeeds.
     /// @param _receiver - Address to transfer NFT to.
     /// @param _tokenId - ID of token to transfer.
-    function _transfer(address _receiver, uint256 _tokenId) internal {
+    function _transfer(address _contract, address _receiver, uint256 _tokenId) internal {
+        ToonInterface _interface = _interfaceByAddress(_contract);
         // it will throw if transfer fails
-        nonFungibleContract.transfer(_receiver, _tokenId);
+        _interface.transferFrom(this, _receiver, _tokenId);
     }
 
     /// @dev Adds an auction to the list of open auctions. Also fires the
     ///  AuctionCreated event.
     /// @param _tokenId The ID of the token to be put on auction.
     /// @param _auction Auction to add.
-    function _addAuction(uint256 _tokenId, Auction _auction) internal {
+    function _addAuction(address _contract, uint256 _tokenId, Auction _auction) internal {
         // Require that all auctions have a duration of
         // at least one minute. (Keeps our math from getting hairy!)
         require(_auction.duration >= 1 minutes);
 
-        tokenIdToAuction[_tokenId] = _auction;
+        _isAddressSupportedContract(_contract);
+        tokenToAuction[_contract][_tokenId] = _auction;
 
-        AuctionCreated(
+        emit AuctionCreated(
+            _contract,
             uint256(_tokenId),
             uint256(_auction.startingPrice),
             uint256(_auction.endingPrice),
@@ -80,20 +115,21 @@ contract ClockAuctionBase {
     }
 
     /// @dev Cancels an auction unconditionally.
-    function _cancelAuction(uint256 _tokenId, address _seller) internal {
-        _removeAuction(_tokenId);
-        _transfer(_seller, _tokenId);
-        AuctionCancelled(_tokenId);
+    function _cancelAuction(address _contract, uint256 _tokenId, address _seller) internal {
+        _removeAuction(_contract, _tokenId);
+        _transfer(_contract, _seller, _tokenId);
+        emit AuctionCancelled(_contract, _tokenId);
     }
 
     /// @dev Computes the price and transfers winnings.
     /// Does NOT transfer ownership of token.
-    function _bid(uint256 _tokenId, uint256 _bidAmount)
-        internal
-        returns (uint256)
+    function _bid(address _contract, uint256 _tokenId, uint256 _bidAmount)
+    internal
+    returns (uint256)
     {
         // Get a reference to the auction struct
-        Auction storage auction = tokenIdToAuction[_tokenId];
+        Auction storage auction = tokenToAuction[_contract][_tokenId];
+        ToonInterface _interface = _interfaceByAddress(auction._contract);
 
         // Explicitly check that this auction is currently live.
         // (Because of how Ethereum mappings work, we can't just count
@@ -111,7 +147,7 @@ contract ClockAuctionBase {
 
         // The bid is good! Remove the auction before sending the fees
         // to the sender so we can't have a reentrancy attack.
-        _removeAuction(_tokenId);
+        _removeAuction(_contract, _tokenId);
 
         // Transfer proceeds to seller (if there are any!)
         if (price > 0) {
@@ -120,6 +156,14 @@ contract ClockAuctionBase {
             // value <= price, so this subtraction can't go negative.)
             uint256 auctioneerCut = _computeCut(price);
             uint256 sellerProceeds = price - auctioneerCut;
+
+            if (_interface.authorAddress() != 0x0) {
+                uint256 toonAuthorShare = _computeAuthorShare(auctioneerCut);
+                auctioneerCut = auctioneerCut - toonAuthorShare;
+                addPendingWithdrawal(_interface.authorAddress(), toonAuthorShare);
+            }
+
+            addPendingWithdrawal(owner, auctioneerCut);
 
             // NOTE: Doing a transfer() in the middle of a complex
             // method like this is generally discouraged because of
@@ -144,15 +188,15 @@ contract ClockAuctionBase {
         msg.sender.transfer(bidExcess);
 
         // Tell the world!
-        AuctionSuccessful(_tokenId, price, msg.sender);
+        emit AuctionSuccessful(_contract, _tokenId, price, msg.sender);
 
         return price;
     }
 
     /// @dev Removes an auction from the list of open auctions.
     /// @param _tokenId - ID of NFT on auction.
-    function _removeAuction(uint256 _tokenId) internal {
-        delete tokenIdToAuction[_tokenId];
+    function _removeAuction(address _contract, uint256 _tokenId) internal {
+        delete tokenToAuction[_contract][_tokenId];
     }
 
     /// @dev Returns true if the NFT is on auction.
@@ -166,9 +210,9 @@ contract ClockAuctionBase {
     ///  structure, and the other that does the price computation) so we
     ///  can easily test that the price computation works correctly.
     function _currentPrice(Auction storage _auction)
-        internal
-        view
-        returns (uint256)
+    internal
+    view
+    returns (uint256)
     {
         uint256 secondsPassed = 0;
 
@@ -197,9 +241,9 @@ contract ClockAuctionBase {
         uint256 _duration,
         uint256 _secondsPassed
     )
-        internal
-        pure
-        returns (uint256)
+    internal
+    pure
+    returns (uint256)
     {
         // NOTE: We don't use SafeMath (or similar) in this function because
         //  all of our public functions carefully cap the maximum values for
@@ -239,4 +283,21 @@ contract ClockAuctionBase {
         return _price * ownerCut / 10000;
     }
 
+    function _computeAuthorShare(uint _ownerCut) internal view returns (uint256) {
+        return _ownerCut * authorShare / 10000;
+    }
+
+    function _interfaceByAddress(address _address) internal view returns (ToonInterface) {
+        uint _index = addressToIndex[_address];
+        ToonInterface _interface = toonContracts[_index];
+        require(_address == address(_interface));
+
+        return _interface;
+    }
+
+    function _isAddressSupportedContract(address _address) internal view returns (bool) {
+        uint _index = addressToIndex[_address];
+        ToonInterface _interface = toonContracts[_index];
+        return _address == address(_interface);
+    }
 }
