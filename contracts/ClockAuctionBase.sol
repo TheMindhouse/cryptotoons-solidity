@@ -156,7 +156,7 @@ contract ClockAuctionBase is Withdrawable, Pausable {
             uint256 auctioneerCut;
             uint256 authorCut;
             uint256 sellerProceeds;
-            (auctioneerCut, authorCut, sellerProceeds) = _computeCut(price);
+            (auctioneerCut, authorCut, sellerProceeds) = _computeCut(_interface, price);
 
             if (authorCut > 0) {
                 addPendingWithdrawal(_interface.authorAddress(), authorCut);
@@ -274,8 +274,8 @@ contract ClockAuctionBase is Withdrawable, Pausable {
     /// @dev Computes owner's cut of a sale.
     /// @param _price - Sale price of NFT.
     function _computeCut(ToonInterface _interface, uint256 _price) internal view returns (
-        uint256 ownerCut,
-        uint256 authorCut,
+        uint256 ownerCutValue,
+        uint256 authorCutValue,
         uint256 sellerProceeds
     ) {
         // NOTE: We don't use SafeMath (or similar) in this function because
