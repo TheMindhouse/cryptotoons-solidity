@@ -7,6 +7,7 @@ contract ERC165MappingImplementation is ERC165 {
     mapping(bytes4 => bool) internal supportedInterfaces;
 
     constructor() internal {
+        //TODO makes sure all the values are set correctly
         supportedInterfaces[this.supportsInterface.selector] = true;
     }
 

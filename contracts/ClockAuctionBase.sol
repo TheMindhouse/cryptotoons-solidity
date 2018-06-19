@@ -28,7 +28,6 @@ contract ClockAuctionBase is Withdrawable, Pausable {
     }
 
     // Reference to contract tracking NFT ownership
-    //    ERC721 public nonFungibleContract;
     ToonInterface[] public toonContracts;
     mapping(address => uint256) addressToIndex;
 
@@ -154,13 +153,13 @@ contract ClockAuctionBase is Withdrawable, Pausable {
             // Calculate the auctioneer's cut.
             // (NOTE: _computeCut() is guaranteed to return a
             // value <= price, so this subtraction can't go negative.)
-            uint256 auctioneerCut = _computeCut(price);
-            uint256 sellerProceeds = price - auctioneerCut;
+            uint256 auctioneerCut;
+            uint256 authorCut;
+            uint256 sellerProceeds;
+            (auctioneerCut, authorCut, sellerProceeds) = _computeCut(price);
 
-            if (_interface.authorAddress() != 0x0) {
-                uint256 toonAuthorShare = _computeAuthorShare(auctioneerCut);
-                auctioneerCut = auctioneerCut - toonAuthorShare;
-                addPendingWithdrawal(_interface.authorAddress(), toonAuthorShare);
+            if (authorCut > 0) {
+                addPendingWithdrawal(_interface.authorAddress(), authorCut);
             }
 
             addPendingWithdrawal(owner, auctioneerCut);
@@ -274,17 +273,29 @@ contract ClockAuctionBase is Withdrawable, Pausable {
 
     /// @dev Computes owner's cut of a sale.
     /// @param _price - Sale price of NFT.
-    function _computeCut(uint256 _price) internal view returns (uint256) {
+    function _computeCut(ToonInterface _interface, uint256 _price) internal view returns (
+        uint256 ownerCut,
+        uint256 authorCut,
+        uint256 sellerProceeds
+    ) {
         // NOTE: We don't use SafeMath (or similar) in this function because
         //  all of our entry functions carefully cap the maximum values for
         //  currency (at 128-bits), and ownerCut <= 10000 (see the require()
         //  statement in the ClockAuction constructor). The result of this
         //  function is always guaranteed to be <= _price.
-        return _price * ownerCut / 10000;
-    }
 
-    function _computeAuthorShare(uint _ownerCut) internal view returns (uint256) {
-        return _ownerCut * authorShare / 10000;
+        uint256 _totalCut = _price * ownerCut / 10000;
+        uint256 _authorCut = 0;
+        uint256 _ownerCut = 0;
+        if (_interface.authorAddress() != 0x0) {
+            _authorCut = _totalCut * authorShare / 10000;
+        }
+
+        _ownerCut = _totalCut - _authorCut;
+        uint256 _sellerProfit = _price - _ownerCut - _authorCut;
+        require(_sellerProfit + _ownerCut + _authorCut == _price);
+
+        return (_ownerCut, _authorCut, _sellerProfit);
     }
 
     function _interfaceByAddress(address _address) internal view returns (ToonInterface) {
