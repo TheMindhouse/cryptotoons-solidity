@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - '9.4.0'
+install:
+  - npm install
+  - npm install -g truffle ganache-cli
+  - truffle version
+
+script:
+- ganache-cli --gasLimit 7000000 -p 8545 > /dev/null &
+- sleep 5
+- rm -rf build
+- truffle migrate --compile-all --network dev --reset
+- travis_wait 30 truffle test --network dev
