@@ -3,12 +3,12 @@ pragma solidity ^0.4.24;
 import "./ToonInterface.sol";
 import "./ToonAuction.sol";
 
-contract CryptoToons is ToonAuction {
+contract CryptoToon is ToonAuction {
 
     //TODO should all the toons have the same symbol??
-    constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons)
+    constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons, address _author)
     public
-    ToonMinting(_name, _symbol, _maxSupply, _maxPromoToons) {
+    ToonAuction(_name, _symbol, _maxSupply, _maxPromoToons, _author) {
     }
 
     function getToonInfo(uint _id) external view returns (

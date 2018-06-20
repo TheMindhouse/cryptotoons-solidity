@@ -9,14 +9,16 @@ contract ToonBase is ERC721Token, AccessControl, ToonInterface {
     Toon[] private toons;
     uint public maxSupply;
     uint32 public maxPromoToons;
+    address public authorAddress;
 
-    constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons)
+    constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons, address _author)
     public
     ERC721Token(_name, _symbol) {
         require(_maxPromoToons <= _maxSupply);
 
         maxSupply = _maxSupply;
         maxPromoToons = _maxPromoToons;
+        authorAddress = _author;
     }
 
     function maxSupply() external view returns (uint) {
@@ -39,6 +41,14 @@ contract ToonBase is ERC721Token, AccessControl, ToonInterface {
     function tokenURI(uint256 _tokenId) public view returns (string) {
         //TODO implement
         revert();
+    }
+
+    function authorAddress() external view returns (address) {
+        return authorAddress;
+    }
+
+    function isToonInterface() external pure returns (bool) {
+        return true;
     }
 
     function _getToon(uint _id) internal view returns (Toon){

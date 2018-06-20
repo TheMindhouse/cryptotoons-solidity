@@ -8,9 +8,9 @@ contract ToonMinting is ToonBase {
 
     uint32 promoToonsMinted = 0;
 
-    constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons)
+    constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons, address _author)
     public
-    ToonBase(_name, _symbol, _maxSupply, _maxPromoToons) {
+    ToonBase(_name, _symbol, _maxSupply, _maxPromoToons, _author) {
     }
 
     function createPromoToon(uint _genes, address _owner) external onlyCOO {
