@@ -12,6 +12,8 @@ contract ClockAuction is ClockAuctionBase {
     ///  Ref: https://github.com/ethereum/EIPs/issues/721
     bytes4 constant InterfaceSignature_ERC721 = bytes4(0x9a20483d);
 
+    bool public isSaleClockAuction = true;
+
     /// @dev Constructor creates a reference to the NFT ownership contract
     ///  and verifies the owner cut is in the valid range.
     /// @param _ownerCut - percent cut the owner takes on each auction, must be

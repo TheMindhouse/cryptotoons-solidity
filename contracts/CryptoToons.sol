@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "./ToonMinting.sol";
 import "./ToonInterface.sol";
+import "./ToonAuction.sol";
 
-contract CryptoToons is ToonMinting {
+contract CryptoToons is ToonAuction {
 
     //TODO should all the toons have the same symbol??
     constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons)
