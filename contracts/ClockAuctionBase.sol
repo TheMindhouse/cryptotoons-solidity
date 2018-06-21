@@ -69,7 +69,9 @@ contract ClockAuctionBase is Withdrawable, Pausable {
     view
     returns (bool) {
         ToonInterface _interface = _interfaceByAddress(_contract);
-        return (_interface.ownerOf(_tokenId) == _claimant);
+        address _owner = _interface.ownerOf(_tokenId);
+
+        return (_owner == _claimant);
     }
 
     /// @dev Escrows the NFT, assigning ownership to this contract.
@@ -159,7 +161,8 @@ contract ClockAuctionBase is Withdrawable, Pausable {
             (auctioneerCut, authorCut, sellerProceeds) = _computeCut(_interface, price);
 
             if (authorCut > 0) {
-                addPendingWithdrawal(_interface.authorAddress(), authorCut);
+                address authorAddress = _interface.authorAddress();
+                addPendingWithdrawal(authorAddress, authorCut);
             }
 
             addPendingWithdrawal(owner, auctioneerCut);

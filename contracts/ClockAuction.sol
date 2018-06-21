@@ -53,8 +53,8 @@ contract ClockAuction is ClockAuctionBase {
         require(_endingPrice == uint256(uint128(_endingPrice)));
         require(_duration == uint256(uint64(_duration)));
 
-        require(_owns(_contract, msg.sender, _tokenId));
-        _escrow(_contract, msg.sender, _tokenId);
+        _escrow(_contract, _seller, _tokenId);
+
         Auction memory auction = Auction(
             _contract,
             _seller,
