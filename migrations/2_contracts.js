@@ -7,4 +7,10 @@ module.exports = function (deployer) {
         .then(instance => {
             instance.setSaleAuctionAddress(SaleAuction.address);
         })
+        .then(() => {
+            return SaleAuction.deployed();
+        })
+        .then(saleAuction => {
+            saleAuction.addToonContract(CryptoToon.address);
+        })
 };
