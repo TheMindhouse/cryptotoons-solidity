@@ -52,7 +52,7 @@ contract ClockAuctionBase is Withdrawable, Pausable {
     /**
     * @notice   Adds a new toon contract.
     */
-    function _addToonContract(address _toonContractAddress) internal {
+    function addToonContract(address _toonContractAddress) external onlyOwner {
         ToonInterface _interface = ToonInterface(_toonContractAddress);
         require(_interface.isToonInterface());
 
