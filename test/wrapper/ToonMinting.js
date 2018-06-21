@@ -18,7 +18,7 @@ export class ToonMinting extends ToonBase {
      * @param options
      * @returns {Promise<void>}
      */
-    createPromoToon = async(genes, owner, options = {}) => {
+    createPromoToon = async (genes, owner = '0x0', options = {}) => {
         return await this.wrapped.createPromoToon(genes, owner, options);
     }
 }

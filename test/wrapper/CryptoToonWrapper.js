@@ -2,7 +2,7 @@ import {ToonAuction} from "./ToonAuction";
 
 const BigNumber = require('bignumber.js');
 
-export class CryptoToon extends ToonAuction {
+export class CryptoToonWrapper extends ToonAuction {
 
     constructor(instance) {
         super(instance)

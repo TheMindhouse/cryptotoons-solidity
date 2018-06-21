@@ -26,4 +26,8 @@ export class ToonBase {
      */
     authorAddress = async () => await this.wrapped.authorAddress();
 
+    get address() {
+        return this.wrapped.address;
+    }
+
 }
