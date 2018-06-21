@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 import "./ToonBase.sol";
 import "./lib/SafeMath32.sol";
@@ -6,11 +6,11 @@ import "./lib/SafeMath32.sol";
 contract ToonMinting is ToonBase {
     using SafeMath32 for uint32;
 
-    uint32 promoToonsMinted = 0;
+    uint32 public promoToonsMinted = 0;
 
-    constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons)
+    constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons, address _author)
     public
-    ToonBase(_name, _symbol, _maxSupply, _maxPromoToons) {
+    ToonBase(_name, _symbol, _maxSupply, _maxPromoToons, _author) {
     }
 
     function createPromoToon(uint _genes, address _owner) external onlyCOO {
@@ -20,8 +20,8 @@ contract ToonMinting is ToonBase {
             _toonOwner = cooAddress;
         }
 
-        _createToon(_genes, _owner);
-        promoToonsMinted.add(1);
+        _createToon(_genes, _toonOwner);
+        promoToonsMinted = promoToonsMinted.add(1);
     }
 
 }

@@ -1,4 +1,4 @@
-pragma solidity 0.4.23;
+pragma solidity 0.4.24;
 
 import "./erc/ERC721.sol";
 
@@ -10,6 +10,12 @@ import "./erc/ERC721.sol";
 contract ToonInterface is ERC721 {
 
     function isToonInterface() external pure returns (bool);
+
+    /**
+    * @notice   Returns an address of the toon author. 0x0 if
+    *           the toon has been created by us.
+    */
+    function authorAddress() external view returns (address);
 
     /**
     * @notice   Returns maximum supply. In other words there will
