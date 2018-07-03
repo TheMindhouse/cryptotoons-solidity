@@ -52,7 +52,8 @@ export class ClockAuctionWrapper extends ClockAuctionBase {
             startingPrice: result[1],
             endingPrice: result[2],
             duration: result[3],
-            startedAt: result[4]
+            startedAt: result[4],
+            currentPrice: result[5]
         };
     };
 

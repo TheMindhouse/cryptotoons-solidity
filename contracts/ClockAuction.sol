@@ -119,16 +119,19 @@ contract ClockAuction is ClockAuctionBase {
         uint256 startingPrice,
         uint256 endingPrice,
         uint256 duration,
-        uint256 startedAt
+        uint256 startedAt,
+        uint256 currentPrice
     ) {
         Auction storage auction = tokenToAuction[_contract][_tokenId];
         require(_isOnAuction(auction));
+
         return (
         auction.seller,
         auction.startingPrice,
         auction.endingPrice,
         auction.duration,
-        auction.startedAt
+        auction.startedAt,
+        getCurrentPrice(_contract, _tokenId)
         );
     }
 
