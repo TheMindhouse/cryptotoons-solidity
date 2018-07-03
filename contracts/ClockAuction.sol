@@ -138,7 +138,7 @@ contract ClockAuction is ClockAuctionBase {
     /// @dev Returns the current price of an auction.
     /// @param _tokenId - ID of the token price we are checking.
     function getCurrentPrice(address _contract, uint256 _tokenId)
-    external
+    public
     view
     returns (uint256)
     {
