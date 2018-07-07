@@ -42,10 +42,12 @@ contract('Basic test suite', async (accounts) => {
     });
 
     it("should put toon on auction", async () => {
-        await saleAuction.getAuction(toon.address, 0).should.be.rejected;
+        let auction = await saleAuction.getAuction(toon.address, 0);
+        auction.startedAt.eq(0).should.be.true
+
         await toon.createSaleAuction(0, 1000000, 0, 6000);
 
-        const auction = await saleAuction.getAuction(toon.address, 0);
+        auction = await saleAuction.getAuction(toon.address, 0);
         auction.seller.should.be.eq(accounts[0]);
         auction.duration.eq(6000).should.be.true;
     });
