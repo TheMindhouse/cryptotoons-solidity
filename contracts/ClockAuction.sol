@@ -124,8 +124,9 @@ contract ClockAuction is ClockAuctionBase {
     ) {
         Auction storage auction = tokenToAuction[_contract][_tokenId];
 
-        //It returns auction even if token is not for sale. Then startedAt = 0
-//        require(_isOnAuction(auction));
+        if (!_isOnAuction(auction)) {
+            return (0x0, 0, 0, 0, 0, 0);
+        }
 
         return (
         auction.seller,
