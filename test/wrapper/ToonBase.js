@@ -19,7 +19,7 @@ export class ToonBase {
     /**
      * @returns {Promise<string>}
      */
-    tokenURI = async () => await this.wrapped.tokenURI();
+    tokenURI = async (id) => await this.wrapped.tokenURI(id);
 
     /**
      * @returns {Promise<string>}

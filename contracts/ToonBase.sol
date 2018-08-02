@@ -3,13 +3,19 @@ pragma solidity ^0.4.24;
 import "./erc/ERC721Token.sol";
 import "./AccessControl.sol";
 import "./ToonInterface.sol";
+import "./lib/StringUtils.sol";
 
 contract ToonBase is ERC721Token, AccessControl, ToonInterface {
+
+    using StringUtils for *;
+    using SafeMath for uint;
 
     Toon[] private toons;
     uint public maxSupply;
     uint32 public maxPromoToons;
     address public authorAddress;
+
+    string public endpoint = "https://mindhouse.io:3100/metadata/";
 
     constructor(string _name, string _symbol, uint _maxSupply, uint32 _maxPromoToons, address _author)
     public
@@ -39,12 +45,17 @@ contract ToonBase is ERC721Token, AccessControl, ToonInterface {
      * @param _tokenId uint256 ID of the token to query
      */
     function tokenURI(uint256 _tokenId) public view returns (string) {
-        //TODO implement
-        revert();
+        require(exists(_tokenId));
+        string memory slash = "/";
+        return endpoint.toSlice().concat(name_.toSlice()).toSlice().concat(slash.toSlice()).toSlice().concat(_tokenId.toString().toSlice());
     }
 
     function authorAddress() external view returns (address) {
         return authorAddress;
+    }
+
+    function changeEndpoint(string newEndpoint) external onlyOwner {
+        endpoint = newEndpoint;
     }
 
     function isToonInterface() external pure returns (bool) {

@@ -59,4 +59,10 @@ contract('Basic test suite', async (accounts) => {
         info.owner.should.be.eq(accounts[9]);
     });
 
+    it("should return correct toon URI", async () => {
+        const uri = await toon.tokenURI(0);
+        uri.should.be.eq("https://mindhouse.io:3100/metadata/toon/0")
+    });
+
+
 });
